@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import sys
+import os
 import requests
 import collections
 from time import strptime, mktime, strftime, localtime, sleep
@@ -30,15 +31,16 @@ class meteoLog:
         self.go_on = True
         self.paused = False
         self.running = False
-        self.pauseBtn = 'p' # tasto di pausa
-        self.stopBtn = 'q' # tasto di stop
-        self.statBtn = 's' # tasto statistiche
+        self.pid = os.getpid()
 
 #-------------------------------------------------------------------------------
-    '''
-    Metodo per controllare se lo script è già instanziato.
-    Devo controllare se il file "running".
-    '''
+# Sarebbe da scrivere nel file il pid del processo.
+    def set_running(self):
+        self.touch(self.lock_r, self.pid)
+        self.running = True
+        
+#-------------------------------------------------------------------------------
+# Sarebbe da far tornare il pid del processo letto dal file di lock
     def is_running(self):
         self.running = os.path.isfile(self.lock_r)
         return self.running
@@ -47,22 +49,26 @@ class meteoLog:
     def not_running(self):
         os.remove(self.lock_r)
         self.running = False
+        
 #-------------------------------------------------------------------------------
-# Controllo se c'è il file di pausa
     def is_paused(self):
         self.paused = os.path.isfile(self.lock_p)
         return self.paused
+        
 #-------------------------------------------------------------------------------
     def unpause(self):
         os.remove(self.lock_p)
         self.paused = False
+        
 #-------------------------------------------------------------------------------
-    def touch(self, path):
-        with open(path, 'a'):
+    def touch(self, path, data=None):
+        with open(path, 'w') as f:
+            f.write(data) 
             os.utime(path, None)
+            
 #-------------------------------------------------------------------------------
     def run_one(self):
-        print('Run lanciato')
+        # print('Run lanciato')
         self.get_data()
         if self.raw_data :
             self.convert_data()
@@ -73,18 +79,20 @@ class meteoLog:
 
 #-------------------------------------------------------------------------------
     def run_loop( self, wait=False ):
-        # controllo su look running
-            # se si esco
-            # se no lo imposto
-        if not wait :
-            wait = self.refr_secs # Intervallo di loop
-        while self.go_on:
-            print( 'Acquisizione dati...\n' )
-            self.run_one()
-            self.show_last()
-            print( 'Pausa di '+ str(wait) +' secondi' )
-            sleep( wait )
-        # elimino file di lock    
+        if self.is_running():
+            print( 'Already running' )
+            exit(1)
+        else :
+            # Se no lo imposto
+            if not wait :
+                wait = self.refr_secs # Intervallo di loop
+            while self.go_on:
+                print( 'Acquisizione dati...\n' )
+                self.run_one()
+                self.show_last()
+                print( 'Pausa di '+ str(wait) +' secondi' )
+                sleep( wait )
+        this.not_running() 
                     
 #-------------------------------------------------------------------------------
 # Controllo se c'è il file di pausa
