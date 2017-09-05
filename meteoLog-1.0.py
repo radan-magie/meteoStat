@@ -73,14 +73,18 @@ class meteoLog:
 
 #-------------------------------------------------------------------------------
     def run_loop( self, wait=False ):
+        # controllo su look running
+            # se si esco
+            # se no lo imposto
         if not wait :
             wait = self.refr_secs # Intervallo di loop
         while self.go_on:
             print( 'Acquisizione dati...\n' )
-        self.run_one()
-        self.show_last()
-        print( 'Pausa di '+ str(wait) +' secondi' )
-        sleep( wait )
+            self.run_one()
+            self.show_last()
+            print( 'Pausa di '+ str(wait) +' secondi' )
+            sleep( wait )
+        # elimino file di lock    
                     
 #-------------------------------------------------------------------------------
 # Controllo se c'è il file di pausa
