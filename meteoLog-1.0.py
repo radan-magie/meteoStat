@@ -10,11 +10,12 @@ from BeautifulSoup import BeautifulSoup as BS
 import csv
 import os.path
 #-------------------------------------------------------------------------------
-# funzione lettura dati
-# mostro a terminale per debug
-# generazione statistiche
-# generazione Grafico
-# mettere contatori: numero cicli, tempo lancio, durata.
+# Todo:
+# - funzione lettura dati
+# - mostro a terminale per debug
+# - generazione statistiche
+# - generazione Grafico ( Pycairo )
+# - mettere contatori: numero cicli, tempo lancio, durata.
 #-------------------------------------------------------------------------------
 class meteoLog:
     ''' Una classe per registrare i dati meteo. '''
@@ -24,6 +25,7 @@ class meteoLog:
         self.data_path = "./data/export.txt"
         self.lock_p = './locks/paused'
         self.lock_r = './locks/running'
+        self.lock_s = './locks/stop'
         self.refr_secs = 60 #tempo di refresh
         self.status = None
         self.raw_data = None
@@ -35,10 +37,11 @@ class meteoLog:
 
 #-------------------------------------------------------------------------------
 # Sarebbe da scrivere nel file il pid del processo.
-    def set_running(self):
+    def set_running(self): 
+        print('PID: '+str(self.pid))
         self.touch(self.lock_r, self.pid)
         self.running = True
-        
+
 #-------------------------------------------------------------------------------
 # Sarebbe da far tornare il pid del processo letto dal file di lock
     def is_running(self):
@@ -49,23 +52,29 @@ class meteoLog:
     def not_running(self):
         os.remove(self.lock_r)
         self.running = False
+
+#-------------------------------------------------------------------------------
+    def can_go(self):
+        self.go_on != os.path.isfile(self.lock_r)
+        return self.go_on
         
 #-------------------------------------------------------------------------------
     def is_paused(self):
         self.paused = os.path.isfile(self.lock_p)
         return self.paused
-        
+
 #-------------------------------------------------------------------------------
     def unpause(self):
         os.remove(self.lock_p)
         self.paused = False
-        
+
 #-------------------------------------------------------------------------------
     def touch(self, path, data=None):
+        data = str(data)
         with open(path, 'w') as f:
-            f.write(data) 
+            f.write(data)
             os.utime(path, None)
-            
+
 #-------------------------------------------------------------------------------
     def run_one(self):
         # print('Run lanciato')
@@ -83,29 +92,30 @@ class meteoLog:
             print( 'Already running' )
             exit(1)
         else :
-            # Se no lo imposto
+            self.set_running()
             if not wait :
                 wait = self.refr_secs # Intervallo di loop
-            while self.go_on:
+            while self.can_go():
                 print( 'Acquisizione dati...\n' )
                 self.run_one()
                 self.show_last()
-                print( 'Pausa di '+ str(wait) +' secondi' )
+                print( '\nPausa di '+ str(wait) +' secondi' )
                 sleep( wait )
-        this.not_running() 
-                    
+            self.not_running()
+
 #-------------------------------------------------------------------------------
 # Controllo se c'è il file di pausa
     def is_paused(self):
         self.paused = os.path.isfile(self.lock_p)
         return self.paused
+        
 #-------------------------------------------------------------------------------
 # Formattare in modo decente x schermo. ( vedere vecchie versioni )
     def show_last(self):
         print self.data
         # Sarebbe da usare una tabella o incolonnare
 #-------------------------------------------------------------------------------
-    # Scarica i dati ed imposta l'attributo self.raw_data
+# Scarica i dati ed imposta l'attributo self.raw_data
     def get_data(self):
         attempts = 0
         #print(source_url)
@@ -182,7 +192,7 @@ class meteoLog:
         except Exception, ex:
             print( ex )
             return False
-            
+
 #-------------------------------------------------------------------------------
     def read_data():
         self.data_path
@@ -196,7 +206,7 @@ class meteoLog:
         pass
 #===============================================================================
 '''
-    Script di avvio, 
+    Script di avvio,
     valutare se trasformare in thread.
 '''
 if __name__ == "__main__":
@@ -222,7 +232,7 @@ if __name__ == "__main__":
         ml.status()
     elif action == 'stop':
         print('Meteolog stops.')
-        ml.touch(ml.lock_p)
+        ml.not_running()
     elif action == 'help' or  action == '-h' :
         print(description)
     else: # Mostro help con parametri
