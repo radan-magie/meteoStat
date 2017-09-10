@@ -162,9 +162,9 @@ class meteoLog:
         read['r_time'] = data[0].encode("ascii").split(" ")
         # Conversione in timestamp:
         read['r_timestamp'] = read['r_time'][4] + mesi[read['r_time'][3]] + read['r_time'][2] + '-' + read['r_time'][0] + ':00'
+        read['01_r_time'] = read['r_timestamp']
         read['r_timestamp'] = strptime( read['r_timestamp'], "%Y%m%d-%H:%M:%S" )
         read['10_r_times'] = mktime(read['r_timestamp'])
-        read['11_r_time'] = read['r_timestamp']
         del read['r_time']
         del read['r_timestamp']
         read['20_temp'] = data[2].split(" ")[0].encode("ascii")
@@ -228,6 +228,7 @@ if __name__ == "__main__":
     elif action == 'test': # Solo una volta
         print('Meteolog test')
         ml.run_one()
+        ml.show_last()
     elif action == 'stats': # Da rifinire.
         print('Meteolog statistics')
         ml.status()
