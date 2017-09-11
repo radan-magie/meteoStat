@@ -26,7 +26,7 @@ class meteoLog:
         self.lock_p = './locks/paused'
         self.lock_r = './locks/running'
         self.lock_s = './locks/stop'
-        self.refr_secs = 60 #tempo di refresh
+        self.refr_secs = 300 #tempo di refresh
         self.status = None
         self.raw_data = None
         self.data = None
@@ -55,7 +55,7 @@ class meteoLog:
 
 #-------------------------------------------------------------------------------
     def can_go(self):
-        self.go_on != os.path.isfile(self.lock_r)
+        self.go_on != os.path.isfile(self.lock_s)
         return self.go_on
         
 #-------------------------------------------------------------------------------
@@ -112,8 +112,10 @@ class meteoLog:
 #-------------------------------------------------------------------------------
 # Formattare in modo decente x schermo. ( vedere vecchie versioni )
     def show_last(self):
-        print self.data
+        #print self.data
         # Sarebbe da usare una tabella o incolonnare
+        for k, v in self.data.items():
+            print(str(k)[3:]+'\t'+str(v))
 #-------------------------------------------------------------------------------
 # Scarica i dati ed imposta l'attributo self.raw_data
     def get_data(self):
@@ -178,6 +180,9 @@ class meteoLog:
         read['81_vent_bea_2'] = data[14].encode("ascii")
         self.data = collections.OrderedDict(sorted(read.items()))
 #-------------------------------------------------------------------------------
+'''
+    Implementare creazione di un file per ogni giorno, una cartella per ogni mese ed anno, con controllo di esistenza.
+'''
     def write_data( self ):
         d_str = ''
         # in alternativa si poteva usare :
@@ -186,6 +191,7 @@ class meteoLog:
             d_str += str(self.data[d])+'\t'
         d_str = d_str[:-1]
         try:
+            # qui implementare controllo esistenza ed eventuale creazione file e cartelle.
             f = open( self.data_path , 'a' )
             f.write( d_str+'\n' )
             f.close()
