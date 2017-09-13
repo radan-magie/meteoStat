@@ -185,7 +185,7 @@ class meteoLog:
         d_str = ''
         for d in self.data:
             d_str += str(self.data[d])+'\t'
-        d_str = d_str[:-1
+        d_str = d_str[:-1]
         today = datetime.today()
         self.save_path = './data/'+str(today.year)+'/'+str(today.month).zfill(2)+'/exp_'+str(today.year)+'.'+str(today.month).zfill(2)+'.'+str(today.day).zfill(2)+'.txt'
         try:
