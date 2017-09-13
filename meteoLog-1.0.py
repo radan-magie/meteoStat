@@ -4,6 +4,7 @@ import sys
 import os
 import requests
 import collections
+import string
 from time import strptime, mktime, strftime, localtime, sleep
 from datetime import datetime
 from BeautifulSoup import BeautifulSoup as BS
@@ -21,8 +22,10 @@ class meteoLog:
     ''' Una classe per registrare i dati meteo. '''
     def __init__(self):
         # Inizializzazione attributi
+        today = datetime.today()
         self.source_url = "http://www.ragnavela.it/meteo/index.htm"
-        self.data_path = "./data/export.txt"
+        self.data_path = "./data/export.txt" # OBSOLETO
+        self.save_path = './data/'+str(today.year)+'/'+str(today.month).zfill(2)+'/exp_'+str(today.year)+'.'+str(today.month).zfill(2)+'.'+str(today.day).zfill(2)+'.txt'
         self.lock_p = './locks/paused'
         self.lock_r = './locks/running'
         self.lock_s = './locks/stop'
@@ -164,9 +167,9 @@ class meteoLog:
         read['r_time'] = data[0].encode("ascii").split(" ")
         # Conversione in timestamp:
         read['r_timestamp'] = read['r_time'][4] + mesi[read['r_time'][3]] + read['r_time'][2] + '-' + read['r_time'][0] + ':00'
-        read['01_r_time'] = read['r_timestamp']
-        read['r_timestamp'] = strptime( read['r_timestamp'], "%Y%m%d-%H:%M:%S" )
-        read['10_r_times'] = mktime(read['r_timestamp'])
+        read['10_r_time'] = read['r_timestamp']
+        # read['r_timestamp'] = strptime( read['r_timestamp'], "%Y%m%d-%H:%M:%S" )
+        # read['10_r_times'] = mktime(read['r_timestamp'])
         del read['r_time']
         del read['r_timestamp']
         read['20_temp'] = data[2].split(" ")[0].encode("ascii")
@@ -180,19 +183,20 @@ class meteoLog:
         read['81_vent_bea_2'] = data[14].encode("ascii")
         self.data = collections.OrderedDict(sorted(read.items()))
 #-------------------------------------------------------------------------------
-'''
-    Implementare creazione di un file per ogni giorno, una cartella per ogni mese ed anno, con controllo di esistenza.
-'''
+    #Implementare creazione di un file per ogni giorno, una cartella per ogni mese ed anno, con controllo di esistenza.
     def write_data( self ):
         d_str = ''
-        # in alternativa si poteva usare :
-        # ' '.join(['word1', 'word2', 'word3'])
         for d in self.data:
             d_str += str(self.data[d])+'\t'
         d_str = d_str[:-1]
         try:
-            # qui implementare controllo esistenza ed eventuale creazione file e cartelle.
-            f = open( self.data_path , 'a' )
+            if not os.path.exists(os.path.dirname(self.save_path)):
+                try:
+                    os.makedirs(os.path.dirname(self.save_path))
+                except OSError as exc:
+                    if exc.errno != errno.EEXIST:
+                        raise
+            f = open( self.save_path , 'a' )
             f.write( d_str+'\n' )
             f.close()
             return True
