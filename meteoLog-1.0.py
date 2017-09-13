@@ -22,10 +22,7 @@ class meteoLog:
     ''' Una classe per registrare i dati meteo. '''
     def __init__(self):
         # Inizializzazione attributi
-        today = datetime.today()
         self.source_url = "http://www.ragnavela.it/meteo/index.htm"
-        self.data_path = "./data/export.txt" # OBSOLETO
-        self.save_path = './data/'+str(today.year)+'/'+str(today.month).zfill(2)+'/exp_'+str(today.year)+'.'+str(today.month).zfill(2)+'.'+str(today.day).zfill(2)+'.txt'
         self.lock_p = './locks/paused'
         self.lock_r = './locks/running'
         self.lock_s = './locks/stop'
@@ -188,7 +185,9 @@ class meteoLog:
         d_str = ''
         for d in self.data:
             d_str += str(self.data[d])+'\t'
-        d_str = d_str[:-1]
+        d_str = d_str[:-1
+        today = datetime.today()
+        self.save_path = './data/'+str(today.year)+'/'+str(today.month).zfill(2)+'/exp_'+str(today.year)+'.'+str(today.month).zfill(2)+'.'+str(today.day).zfill(2)+'.txt'
         try:
             if not os.path.exists(os.path.dirname(self.save_path)):
                 try:
@@ -205,9 +204,8 @@ class meteoLog:
             return False
 
 #-------------------------------------------------------------------------------
-    def read_data():
-        self.data_path
-        f = open(data_path, r )
+    def read_data(path):
+        f = open(path, r )
         d_read = f.readlines()
         f.close()
         return d_read
